@@ -21,7 +21,7 @@
             <span class="completed">Completed ✓</span>
 
         {% elif level_id in unlocked_levels %}
-            <a href="{{ url_for('level', level_id=level_id) }}">Enter Level</a>
+            <a href="{{ url_for('level_page', level_id=level_id) }}">Enter Level</a>
 
         {% else %}
             <span class="locked">

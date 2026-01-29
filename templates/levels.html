@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Levels Section</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
@@ -13,26 +13,26 @@
 <p><strong>Title:</strong> {{ title }}</p>
 
 <ul>
-{% for level_id, data in levels.items() %} <!--This is a loop that will show all available levels-->
+{% for level_id, data in levels.items() %}
     <li>
         <strong>{{ data.name }}</strong>
 
         {% if level_id in completed_levels %}
-            <span style="color: green;">Completed ✓</span>
+            <span class="completed">Completed ✓</span>
 
         {% elif level_id in unlocked_levels %}
-            <a href="/level/{{ level_id }}">Enter Level</a>
+            <a href="{{ url_for('level', level_id=level_id) }}">Enter Level</a>
 
         {% else %}
-            <span style="color: red;">
+            <span class="locked">
                 Locked (Requires {{ data.unlock_xp }} XP)
             </span>
         {% endif %}
     </li>
-{% endfor %} <!--END THE LOOP-->
+{% endfor %}
 </ul>
 
-<p><a href="/">Home</a></p>
+<p><a href="{{ url_for('home') }}">Home</a></p>
 
 </body>
 </html>

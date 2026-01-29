@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="/static/css/style.css"> <!--This will access the file from our static folder and apply all styles to the HTML page-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Math Level Up!</title>
 </head>
 <body>
     <h1>Welcome to Math Level Up!</h1>
     <p>This is a website that helps you learn basic and moderate algebra problems!</p>
     <p>With every question you get right, you gain XPs. Earn more XPs to rank up. Have fun and start learning!</p>
-    <p><strong>XP:</strong> {{ xp }}</p> <!--Shows all the variables or the status of the user-->
+
+    <p><strong>XP:</strong> {{ xp }}</p>
     <p><strong>Stars:</strong> {{ stars }}</p>
     <p><strong>Level:</strong> {{ level }}</p>
     <p><strong>Title:</strong> {{ title }}</p>
-    <p><a href="/levels">Levels</a></p>
+
+    <p><a href="{{ url_for('levels') }}">Levels</a></p>
 </body>
 </html>

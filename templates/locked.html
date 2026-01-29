@@ -2,13 +2,14 @@
 <html>
 <head>
     <title>Level Locked</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<h1>{{ level.name }} is Locked</h1>
-<p>You need {{ level.unlock_xp }} XP to unlock this level.</p>
+    <h1>{{ level.name }} is Locked</h1>
+    <p>You need {{ level.unlock_xp }} XP to unlock this level.</p>
 
-<a href="/levels">Back to Levels</a>
+    <a href="{{ url_for('levels') }}">Back to Levels</a>
 
 </body>
 </html>

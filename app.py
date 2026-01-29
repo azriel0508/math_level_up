@@ -117,7 +117,7 @@ def home():
     ) 
 
 @app.route("/levels")
-def level_select():
+def levels():
     global user_xp, user_stars
 
     #Determine all of the unlocked levels:

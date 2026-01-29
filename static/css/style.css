@@ -2,19 +2,39 @@ body {
     background-color: #f0f0f0;
     font-family: Arial, sans-serif;
 }
+
 h1 {
-    color: #2b6cb0
+    color: #2b6cb0;
 }
+
 p {
     font-size: 1.2em;
 }
+
 .progress-container {
     width: 300px;
     border: 1px solid #000;
     margin-bottom: 10px;
+    background-color: #ddd;
 }
+
 .progress-bar {
     height: 20px;
     background-color: green;
     width: var(--progress-width);
+    transition: width 0.3s ease-in-out;
+}
+
+.completed {
+    color: green;
+    font-weight: bold;
+}
+
+.locked {
+    color: red;
+}
+
+.level-complete {
+    color: green;
+    font-weight: bold;
 }

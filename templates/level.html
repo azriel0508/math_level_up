@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ level.name }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<h1>{{ level.name }}</h1>
+
+<!--Current Statistics: -->
+<p><strong>XP:</strong> {{ xp }}</p>
+<p><strong>Current Streak:</strong> {{ streak }}</p>
+<p><strong>Stars:</strong> {{ stars }}</p>
+<p><strong>Title:</strong> {{ title }}</p>
+
+<p>
+  <strong>Level Progress:</strong>
+  {{ question_number - 1 }} / {{ total_questions }} questions
+</p>
+
+<div class="progress-container">
+  <div
+    class="progress-bar"
+    style="--progress-width: {{ progress_percent }}%;">
+  </div>
+</div>
+
+<!--This will show if the level is completed-->
+{% if level_status %}
+<p style="color: green;"><strong>{{ level_status }}</strong></p>
+{% endif %}
+
+<!--This shows the equation to be answered-->
+<p>Solve for x:</p>
+{% if current_question %}
+<p><strong>Question {{ question_number }} of {{ total_questions }}</strong></p>
+<p><strong>{{ current_question.question }}</strong></p>
+{% else %}
+<p><strong>All questions completed!</strong></p>
+{% endif %}
+
+<!--This will post the answer of the user to the server for flask to access and process using python-->
+{% if current_question %}
+<form method="POST">
+    <input type="text" name="answer">
+    <button type="submit">Submit</button>
+</form>
+{% endif %}
+
+{% if result %}
+<p>{{ result }}</p>
+{% endif %}
+
+<p><a href="/levels">Back to Level Select</a></p> <!--Going back to previous page-->
+
+</body>
+</html>

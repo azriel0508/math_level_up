@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for
 from questions import QUESTIONS
 import random
 
+#The following connects our Database to Flask:
+from models import db
+
 #Global Variables (Temporary before we add databases):
 user_xp = 0 
 user_stars = 0
@@ -100,6 +103,12 @@ def get_current_level_id() -> int:
 
 app = Flask(__name__)
 
+#Database configuration:
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///math.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+
 @app.route("/")
 def home():
     global user_xp, user_stars
@@ -108,7 +117,7 @@ def home():
     current_level_name = LEVELS[current_level_id]["name"]
     title = get_title(user_stars)
 
-    return render_template( #This will check the templates folder for the file home.html then execute it
+    return render_template(
         "home.html",
         xp=user_xp,
         stars=user_stars,
@@ -128,16 +137,16 @@ def levels():
 
     return render_template(
         "levels.html",
-        xp = user_xp,
-        stars = user_stars,
-        unlocked_levels = unlocked_levels,
-        completed_levels = completed_levels,
-        levels = LEVELS,
-        title = get_title(user_stars)
+        xp=user_xp,
+        stars=user_stars,
+        unlocked_levels=unlocked_levels,
+        completed_levels=completed_levels,
+        levels=LEVELS,
+        title=get_title(user_stars)
     )
 
-@app.route("/level/<int:level_id>", methods=["GET", "POST"]) #This allows us to capture the url given by flask: data posted(POST) in the server
-def level_page(level_id): #This route is all of the different levels of our system and it also shows if it can be played or not
+@app.route("/level/<int:level_id>", methods=["GET", "POST"])
+def level_page(level_id):
     global user_xp, user_stars, current_streak
 
     #Checking if the level exists:
@@ -148,19 +157,16 @@ def level_page(level_id): #This route is all of the different levels of our syst
 
     #Checking if this level is unlocked:
     if user_xp < level_data["unlock_xp"]:
-        return render_template("locked.html", level=level_data) #this will show that it is still locked so the function ends right here
+        return render_template("locked.html", level=level_data)
     
-    #Answer:
-    questions = list(QUESTIONS[level_id])
-
-    # Initialize shuffled questions once per level
+    #Initialize shuffled questions once per level
     if level_id not in shuffled_questions:
         questions = list(QUESTIONS[level_id])
         random.shuffle(questions)
         shuffled_questions[level_id] = questions
     else:
         questions = shuffled_questions[level_id]
-    
+
     #This will show that the level is completed
     level_status = None
     if level_id in completed_levels:
@@ -172,23 +178,20 @@ def level_page(level_id): #This route is all of the different levels of our syst
     current_index = question_progress[level_id]
 
     if current_index >= len(questions):
-        # Level already completed
-        level_status = "✅ This level is already completed."
         current_question = None
+        level_status = "✅ This level is already completed."
     else:
         current_question = questions[current_index]
 
-    #Initialising message before post to avoid errors
     message = None
 
     if request.method == "POST" and current_question:
-        #The following variable is reading in user input from the HTML:
-        user_answer = request.form.get("answer", "").strip() #This request.form is how flask reads form data posted by HTML. The get is trying to get the form answer but if there is not then return an empty string. The strip removies whitespaces. 
+        user_answer = request.form.get("answer", "").strip()
 
         try:
-            user_x = float(user_answer) #Converting the given string from user_answer as a number
+            user_x = float(user_answer)
         except ValueError:
-            message = "Please enter a valid number." #This is when the input of the user cannot be converted to a float or a number
+            message = "Please enter a valid number."
         else:
             if user_x == current_question["answer"]:
                 current_streak += 1
@@ -199,35 +202,29 @@ def level_page(level_id): #This route is all of the different levels of our syst
                     completed_levels.add(level_id)
                     user_stars += LEVELS[level_id]["star_reward"]
 
-                return redirect(url_for("level_page", level_id=level_id)) #here we are basically redirecting to refresh the url and get the updated status without having to post again.
-
+                return redirect(url_for("level_page", level_id=level_id))
             else:
                 current_streak = 0
                 message = "Incorrect! Streak reset."
-                
-    return render_template( #This is where flasks chooses what html to display which is level.html and send all variables to that html which has been processed by python
+
+    return render_template(
         "level.html",
-        # UI feedback
         result=message,
         level_status=level_status,
-
-        # User stats
         streak=current_streak,
         xp=user_xp,
         stars=user_stars,
         title=get_title(user_stars),
-
-        # Level info
         level=level_data,
-
-        # Question system
         current_question=current_question,
         question_number=question_progress[level_id] + 1,
         total_questions=len(QUESTIONS[level_id]),
-
-        # Progress bar (question-based)
-        progress_percent=(question_progress[level_id] / len(QUESTIONS[level_id])) * 100 #Math for progress bar
+        progress_percent=(question_progress[level_id] / len(QUESTIONS[level_id])) * 100
     )
-    
+
 if __name__ == "__main__":
-    app.run(debug=True) #This allows us to auto reload or change our python code without having to restart the server. It also gives better error messages.
+    #Create database tables BEFORE running the server
+    with app.app_context():
+        db.create_all()
+
+    app.run(debug=True)

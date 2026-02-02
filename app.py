@@ -4,6 +4,7 @@ import random
 
 #The following connects our Database to Flask:
 from models import db
+import models
 
 #Global Variables (Temporary before we add databases):
 user_xp = 0 

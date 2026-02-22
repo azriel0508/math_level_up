@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+from models import User
 from questions import QUESTIONS
 import random
 
@@ -104,27 +105,68 @@ def get_current_level_id() -> int:
 
 app = Flask(__name__)
 
+#Flask stores sessions in cookies, to avoid the user changing the cookies manually we sign them with a secret key
+app.secret_key = "dev-secret-key"
+
 #Database configuration:
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///math.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
+
+@app.route("/login", methods=["GET", "POST"]) #GET show login page, POST process form submission
+def login():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip() #reads the name entered in the HTML and gets rid of empty strings
+
+        if not name:
+            return render_template("login.html", error="Name is required")
+
+        # Check if user already exists. If exists we return if not we return nothing
+        user = User.query.filter_by(name=name).first()
+
+        #Creating a new user:
+        if not user:
+            user = User(name=name)
+            db.session.add(user)
+            db.session.commit()
+
+        #This is now the user id
+        session["user_id"] = user.id
+
+        #We redirect to prevent duplicate submissions
+        return redirect(url_for("home"))
+
+    return render_template("login.html")
+
+#Helper Function:
+def get_current_user():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return None
+
+    return User.query.get(user_id)
+
 @app.route("/")
 def home():
-    global user_xp, user_stars
+    user = get_current_user()
+
+    if not user:
+        return redirect(url_for("login"))
 
     current_level_id = get_current_level_id()
     current_level_name = LEVELS[current_level_id]["name"]
-    title = get_title(user_stars)
+    title = get_title(user.stars)
 
     return render_template(
         "home.html",
-        xp=user_xp,
-        stars=user_stars,
+        xp=user.xp,
+        stars=user.stars,
         level=current_level_name,
         title=title,
-    ) 
+    )
 
 @app.route("/levels")
 def levels():

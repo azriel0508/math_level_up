@@ -271,3 +271,6 @@ if __name__ == "__main__":
         db.create_all()
 
     app.run(debug=True)
+
+
+#Committing only the user login, remove globals next change with actual DB
